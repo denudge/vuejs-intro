@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import ZwiftActivity from '@/components/ZwiftActivity'
+import RideActivity from '@/components/RideActivity'
 
 export default {
   name: 'Activities',
@@ -41,7 +41,7 @@ export default {
   methods: {
   },
   components: {
-    ZwiftActivity
+    RideActivity
   },
   mounted () {
   }
