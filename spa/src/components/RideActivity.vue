@@ -50,5 +50,6 @@ export default {
     padding: 0.5em;
     background-color: #EEE;
     border-radius: 5px;
+    text-align: left;
   }
 </style>
