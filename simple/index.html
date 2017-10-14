@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style type="text/css">
+            
+            .section {
+                margin-bottom: 1000px;
+            }
+
+            .bold {
+                font-weight: bold;
+            }
+
+            .italic {
+                font-style: italic;
+            }
+
+            .ride-activity {
+                margin: 2em;
+                padding: 0.5em;
+                background-color: #EEE;
+                border-radius: 5px;
+            }
+
+        </style>
+    </head>
+    <body>
+        <script src="https://unpkg.com/vue/dist/vue.js"></script>
+        
+        <h1>Vue in simple HTML pages</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="section" id="app1">
+            <h3>Data binding - simple example</h3>
+            <p>{{ message }}</p>
+            <button v-on:click="setMessage('Huhu!')">C&apos;mon, click on me!</button>
+        </div>
+
+        <script type="text/javascript">
+            var app = new Vue({
+                el: '#app1',
+                data: {
+                    message: 'Hello Vue!'
+                },
+                methods: {
+                    setMessage: function(text) {
+                        app.message = text;
+                    }
+                }
+            });
+        </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="section" id="app2">
+            <h3>Computed values and Watchers</h3>
+            <form @submit.prevent="alertName" action="/post.html" method="post">
+                <input type="text" v-model="name" :value="name" placeholder="Type your name">
+                <input type="submit" value="Send my name">
+            </form>
+            <p>Reversed: {{ reversed }}</p>
+        </div>        
+        
+        <script type="text/javascript">
+            var app2 = new Vue({
+                el: '#app2',
+                data: {
+                    name: '',
+                },
+                computed: {
+                    reversed: function() {
+                        return this.name.split('').reverse().join('');
+                    }
+                },
+                watch: {
+                    reversed: function(value) {
+                        console.log('New value ' + value);
+                    }
+                },
+                methods: {
+                    alertName: function(e) {
+                        alert('Is your name ' + this.name + '?');
+                    }
+                }
+            });
+        </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="section" id="app3">
+            <h3>Some CSS style class foo</h3>
+            <p :class="[{bold : bold }, {italic : italic}, 'myclass']">{{ text }}</p>
+            <input type="checkbox" :checked="bold" @click="toggleBold" value="1"> Bold<br/>
+            <input type="checkbox" :checked="italic" @click="toggleItalic" value="1"> Italic<br/>
+        </div>
+
+        <script type="text/javascript">
+            var app3 = new Vue({
+                el: '#app3',
+                data: {
+                    text: 'This is some basic text.',
+                    bold: false,
+                    italic: false,
+                },
+                methods: {
+                    toggleBold: function() {
+                        this.bold = !this.bold;
+                    },
+                    toggleItalic: function() {
+                        this.italic = !this.italic;
+                    }
+                }
+            });
+        </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="section" id="app4">
+            <h3>Auto-completion example</h3>
+            <form id="searchForm" @submit.prevent="addSearch">
+                Search: <input id="searchbar" autocomplete="off" ref="searchbar" type="text"
+                               v-model="search"
+                               placeholder="Type your search..."
+                               @keyup.down="jumpToRecommendations">
+                <input type="submit" value="Suchen">
+            </form>
+
+            <form @submit.prevent="takeRecommendation" id="completeForm" v-show="show_recommendations">
+                <h4>Recommendations</h4>
+                <select size="10" ref="recommendation_list"
+                        v-model="choice"
+                        @keyup.enter="submit"
+                        @keyup.esc="backToSearch"
+                        id="recommendation_list">
+                    <option v-for="term in recommendations" :value="term.text">{{ term.text }}</option>
+                </select>
+                <input type="submit" value="Take that" style="display:none;">
+            </form>
+ 
+            <h4>So far people have searched for:</h4>
+            <ul>
+                <li v-for="term in previous">{{ term.text }} ({{ term.hits }})</li>
+            </ul>
+        </div>
+
+        <script type="text/javascript">
+            var app4 = new Vue({
+                el: '#app4',
+                data: {
+                    search: '',
+                    choice: '',
+                    previous: [],
+                    recommendations: []
+                },
+                computed: {
+                    show_recommendations: function() {
+                        return (this.recommendations.length > 0);
+                    }
+                },
+                methods: {
+                    autocomplete: function() {
+                        this.choice = '';
+                        if (this.search === '') {
+                            this.recommentations = [];
+                            return;
+                        }
+                        var search = this.search;
+                        console.log('Searching for ' + search);
+                        this.recommendations = this.previous.filter(function(term) {
+                            return (term.text.indexOf(search) > -1);
+                        }).sort(function(a, b) {
+                            return b.hits - a.hits; // descending
+                        });
+
+                        if (this.recommendations.length > 10) {
+                            this.recommendations.length = 10;
+                        }
+                    },
+                    getSearch: function(search) {
+                        if (search === '') {
+                            return undefined;
+                        }
+                        var candidates = this.previous.filter(function(term) {
+                            return (term.text === search);
+                        });
+                        if (candidates.length > 0) {
+                            return candidates[0];
+                        }
+                        return undefined;
+                    },
+                    addSearch: function() {
+                        if (this.search === '') {
+                            return;
+                        }
+                        existent = this.getSearch(this.search);
+                        if (existent === undefined) {
+                            this.previous.push({ text: this.search, hits: 1 });
+                        } else {
+                            existent.hits++;
+                        }
+                        this.search = '';
+                        this.recommendations = [];
+                    },
+                    takeRecommendation: function() {
+                        this.search = this.choice;
+                        this.choice = '';
+                        this.recommendations= [];
+                        this.backToSearch();
+                    },
+                    backToSearch: function() {
+                        this.$refs.searchbar.focus();
+                    },
+                    jumpToRecommendations: function() {
+                        this.$refs.recommendation_list.focus();
+                    }
+                },
+                watch: {
+                    search: function(newSearch) {
+                        this.search = newSearch;
+                        this.autocomplete();
+                    }
+                }
+            });
+
+        </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div id="app5">
+            <h2>Your last activities</h2>
+            <ride-activity v-for="activity in activities" :activity="activity"></ride-activity>
+        </div>
+
+
+        <script type="text/javascript">
+            Vue.component('ride-activity', {
+                props: [
+                    'activity'
+                ],
+                data: function() {
+                    return {
+                        likes: this.activity.likes,
+                        comments: this.activity.comments,
+                        show_comments: false
+                    }
+                },
+                methods: {
+                    addLike: function() {
+                        this.likes += 1;
+                    },
+                    toggleComments: function() {
+                        this.show_comments = !this.show_comments;
+                    }
+                },
+                template: '<div class="ride-activity">\
+                                <h5>{{ activity.name }}</h5>\
+                                <span>{{ activity.time }}</span>\
+                                <h4>{{ activity.title }}</h4>\
+                                <div class="meta">\
+                                    <span><strong>{{ activity.distance }}km</strong></span>\
+                                    <span>{{ activity.elevation_gain }}m</span>\
+                                    <span>{{ activity.trophies }} trophies</span>\
+                                </div>\
+                                <button @click="addLike">{{ likes }} Likes</button>\
+                                <button @click="toggleComments">{{ comments.length }} Comments</button>\
+                                <div class="comments" v-show="show_comments">\
+                                    <p v-for="comment in comments"><i>{{ comment }}</i></p>\
+                                </div>\
+                            </div>'
+            });
+
+            var app5 = new Vue({
+                el: '#app5',
+                data: {
+                    activities: [
+                        {
+                            name: "Dyno Rider",
+                            title: "Radfahrt am Nachmittag",
+                            time: "Heute um 18:01",
+                            distance: 121.1,
+                            elevation_gain: 458,
+                            trophies: 17,
+                            likes: 3,
+                            comments: []
+                        },
+                        {
+                            name: "Dyno Rider",
+                            title: "Radfahrt am Vormittag (Pendeln)",
+                            time: "Gestern um 08:43",
+                            distance: 4.9,
+                            elevation_gain: 21,
+                            trophies: 2,
+                            likes: 12,
+                            comments: ['Super, weiter so!', 'Krasses Wetter, oder?']
+                        },
+                    ]
+                }
+            });
+        </script>
+
+    </body>
+</html>
