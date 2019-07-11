@@ -1,7 +1,7 @@
 <template>
   <div class="activities">
       <h2>Your last activities</h2>
-      <ride-activity v-for="activity in activities" :activity="activity"></ride-activity>
+      <ride-activity v-for="activity in activities" :activity="activity" :key="activity.id"></ride-activity>
   </div>
 </template>
 
@@ -16,6 +16,7 @@ export default {
     return {
       activities: [
         {
+          id: 17,
           name: 'Dyno Rider',
           title: 'Radfahrt am Nachmittag',
           time: 'Heute um 18:01',
@@ -26,6 +27,7 @@ export default {
           comments: []
         },
         {
+          id: 18,
           name: 'Dyno Rider',
           title: 'Radfahrt am Vormittag (Pendeln)',
           time: 'Gestern um 08:43',
